@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\Customer\CustomerAddressController;
 use App\Http\Controllers\Api\Customer\AuthController;
 use App\Http\Controllers\Api\Customer\NotificationController;
 use App\Http\Controllers\Api\Customer\ZoneController;
+use App\Http\Controllers\Api\Customer\AreaController;
 use App\Http\Controllers\Api\Customer\ProfileController;
 /*
 |--------------------------------------------------------------------------
@@ -38,6 +39,7 @@ Route::post('/orders', [OrderController::class, 'store']);
 
     // Zones and areas (for address selection)
     Route::get('/zones', [ZoneController::class, 'index']);
+    Route::get('/areas', [AreaController::class, 'index']);
     
     // Update customer area
     Route::post('/area', [ProfileController::class, 'updateArea']);
@@ -52,6 +54,12 @@ Route::post('/orders', [OrderController::class, 'store']);
     Route::put('/cart/{id}', [App\Http\Controllers\Api\Customer\CartController::class, 'update']);
     Route::delete('/cart/{id}', [App\Http\Controllers\Api\Customer\CartController::class, 'destroy']);
     Route::delete('/cart', [App\Http\Controllers\Api\Customer\CartController::class, 'clear']);
+
+    // Orders
+    Route::get('/orders', [OrderController::class, 'index']);
+    Route::get('/orders/processing', [OrderController::class, 'processing']);
+    Route::get('/orders/finished', [OrderController::class, 'finished']);
+    Route::get('/orders/{id}', [OrderController::class, 'show']);
 });
 
 

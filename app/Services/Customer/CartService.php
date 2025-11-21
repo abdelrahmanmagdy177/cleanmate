@@ -8,11 +8,21 @@ use App\Models\CustomerAddress;
 use App\Models\Service;
 use App\Models\Timeslot;
 use App\Models\TimeslotOrder;
+use App\Services\PricingService;
+use App\Services\CustomerService;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Validation\ValidationException;
 
 class CartService
 {
+    protected PricingService $pricingService;
+    protected CustomerService $customerService;
+
+    public function __construct(PricingService $pricingService, CustomerService $customerService)
+    {
+        $this->pricingService = $pricingService;
+        $this->customerService = $customerService;
+    }
     /**
      * Get all cart items for a customer.
      */
@@ -121,7 +131,7 @@ class CartService
         $items = [];
 
         foreach ($cartItems as $item) {
-            $price = $item->calculatePrice();
+            $price = $this->pricingService->calculateCartItemPrice($item);
             
             if ($price !== null) {
                 $subtotal += $price;

@@ -35,36 +35,4 @@ class CartItem extends Model
     {
         return $this->belongsTo(CustomerAddress::class, 'customer_address_id');
     }
-
-    /**
-     * Calculate the price for this cart item.
-     */
-    public function calculatePrice(): ?float
-    {
-        $area = $this->address->area;
-        
-        if (!$area) {
-            return null;
-        }
-
-        $priceModel = $this->variant->prices()
-            ->where('area_id', $area->id)
-            ->where('min_space', '<=', $this->space)
-            ->where(function ($query) {
-                $query->where('max_space', '>=', $this->space)
-                      ->orWhereNull('max_space');
-            })
-            ->orderBy('min_space', 'desc')
-            ->first();
-
-        if (!$priceModel) {
-            return null;
-        }
-
-        $servicePrice = $priceModel->price;
-        $vatRate = config('cleanmate.vat_rate', 14.00);
-        $vatAmount = round(($servicePrice * $vatRate) / 100, 2);
-        
-        return $servicePrice + $vatAmount;
-    }
 }

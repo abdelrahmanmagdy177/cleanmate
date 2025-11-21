@@ -8,45 +8,38 @@ use App\Models\ServiceVariant;
 use App\Models\Timeslot;
 use App\Models\TimeslotOrder;
 use App\Models\CustomerAddress;
+use App\Services\TimeslotService;
+use App\Services\PricingService;
+use App\Services\CustomerService;
+use App\Services\OrderQueryService;
 use Carbon\Carbon;
 use Illuminate\Validation\ValidationException;
 
 class OrderService
 {
+    protected TimeslotService $timeslotService;
+    protected PricingService $pricingService;
+    protected CustomerService $customerService;
+    protected OrderQueryService $orderQueryService;
+
+    public function __construct(
+        TimeslotService $timeslotService,
+        PricingService $pricingService,
+        CustomerService $customerService,
+        OrderQueryService $orderQueryService
+    ) {
+        $this->timeslotService = $timeslotService;
+        $this->pricingService = $pricingService;
+        $this->customerService = $customerService;
+        $this->orderQueryService = $orderQueryService;
+    }
+
     /**
      * Get available timeslots for a specific date and area.
-     *
-     * @param string $date
-     * @param int $areaId
-     * @return array
      */
     public function getAvailableTimeslots(string $date, int $areaId): array
     {
-        $dayOfWeek = Carbon::parse($date)->dayOfWeek;
-        
-        $timeslots = Timeslot::where('is_active', true)
-            ->where('day', $dayOfWeek)
-            ->where('area_id', $areaId)
-            ->get();
-            
-        $availableSlots = [];
-
-        foreach ($timeslots as $slot) {
-            $bookedCount = TimeslotOrder::where('timeslot_id', $slot->id)
-                ->where('date', $date)
-                ->count();
-
-            if ($bookedCount < $slot->capacity) {
-                $availableSlots[] = [
-                    'id' => $slot->id,
-                    'start_time' => $slot->start_time,
-                    'end_time' => $slot->end_time,
-                    'remaining_capacity' => $slot->capacity - $bookedCount
-                ];
-            }
-        }
-        
-        return $availableSlots;
+        return $this->timeslotService->getAvailableTimeslots($date, $areaId);
     }
 
     /**
@@ -69,12 +62,11 @@ class OrderService
         }
 
         // Find or create customer
-        $customer = Customer::firstOrCreate(
-            ['email' => $data['customer_email']],
+        $customer = $this->customerService->findOrCreateByEmail(
+            $data['customer_email'],
             [
                 'name' => $data['customer_name'],
-                'phone' => $data['customer_phone'],
-                'status' => 'active'
+                'phone' => $data['customer_phone']
             ]
         );
         
@@ -117,21 +109,13 @@ class OrderService
         $variant = ServiceVariant::find($data['variant_id']);
         
         // Find matching price for the space and area
-        $priceModel = $variant->prices()
-            ->where('area_id', $area->id)
-            ->where('min_space', '<=', $data['space'])
-            ->where(function ($query) use ($data) {
-                $query->where('max_space', '>=', $data['space'])
-                      ->orWhereNull('max_space');
-            })
-            ->orderBy('min_space', 'desc') // Get the most specific range (highest min_space that fits)
-            ->first();
-
-        if (!$priceModel) {
-            throw ValidationException::withMessages(['space' => 'No pricing available for this space size.']);
+        $servicePrice = $this->pricingService->findPrice($variant, $data['space'], $area->id);
+        
+        if (!$servicePrice) {
+            throw ValidationException::withMessages(['space' => 'No pricing available for the selected space.']);
         }
 
-        $price = $priceModel->price;
+        $totalPrice = $this->pricingService->calculateTotalWithVAT($servicePrice);
 
         // Create order with pricing calculation
         $order = new Order([
@@ -147,7 +131,7 @@ class OrderService
         ]);
 
         // Calculate all pricing components
-        $order->calculatePricing($price);
+        $order->calculatePricing($servicePrice);
         $order->save();
 
         // Link timeslot
@@ -158,5 +142,49 @@ class OrderService
         ]);
 
         return $order;
+    }
+
+    /**
+     * Get all orders for a customer.
+     */
+    public function getCustomerOrders(int $customerId)
+    {
+        return $this->orderQueryService->getCustomerOrders($customerId);
+    }
+
+    /**
+     * Get processing orders (pending, assigned, in_progress).
+     */
+    public function getProcessingOrders(int $customerId)
+    {
+        return $this->orderQueryService->getProcessingOrders($customerId);
+    }
+
+    /**
+     * Get finished orders (completed, cancelled).
+     */
+    public function getFinishedOrders(int $customerId)
+    {
+        return $this->orderQueryService->getFinishedOrders($customerId);
+    }
+
+    /**
+     * Get a single order by ID for a customer.
+     */
+    public function getOrderById(int $customerId, int $orderId): ?Order
+    {
+        return $this->orderQueryService->getOrderById($customerId, $orderId);
+    }
+
+    /**
+     * Get orders by classification or specific status.
+     * 
+     * @param int $customerId
+     * @param string|null $classification Can be 'processing', 'finished', or any specific status
+     * @return \Illuminate\Database\Eloquent\Collection
+     */
+    public function getOrdersByClassification(int $customerId, ?string $classification = null)
+    {
+        return $this->orderQueryService->getOrdersByClassification($customerId, $classification);
     }
 }

@@ -4,8 +4,9 @@ namespace App\Http\Controllers\Api\Customer;
 
 use App\Http\Controllers\Controller;
 use App\Services\Customer\CartService;
+use App\Http\Requests\Customer\StoreCartItemRequest;
+use App\Http\Requests\Customer\UpdateCartItemRequest;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 
 class CartController extends Controller
@@ -35,23 +36,11 @@ class CartController extends Controller
     /**
      * Add item to cart.
      */
-    public function store(Request $request)
+    public function store(StoreCartItemRequest $request)
     {
-        $validator = Validator::make($request->all(), [
-            'service_id' => 'required|exists:services,id',
-            'variant_id' => 'required|exists:service_variants,id',
-            'customer_address_id' => 'required|exists:customer_addresses,id',
-            'space' => 'required|integer|min:1',
-            'notes' => 'nullable|string',
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 422);
-        }
-
         try {
             $customer = $request->user();
-            $cartItem = $this->cartService->addToCart($customer->id, $request->all());
+            $cartItem = $this->cartService->addToCart($customer->id, $request->validated());
 
             return response()->json([
                 'message' => 'Item added to cart successfully',
@@ -65,19 +54,10 @@ class CartController extends Controller
     /**
      * Update cart item.
      */
-    public function update(Request $request, $id)
+    public function update(UpdateCartItemRequest $request, $id)
     {
-        $validator = Validator::make($request->all(), [
-            'space' => 'sometimes|integer|min:1',
-            'notes' => 'nullable|string',
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 422);
-        }
-
         $customer = $request->user();
-        $cartItem = $this->cartService->updateCartItem($id, $customer->id, $request->all());
+        $cartItem = $this->cartService->updateCartItem($id, $customer->id, $request->validated());
 
         if (!$cartItem) {
             return response()->json(['error' => 'Cart item not found'], 404);
