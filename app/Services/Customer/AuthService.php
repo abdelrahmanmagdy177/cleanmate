@@ -2,10 +2,9 @@
 
 namespace App\Services\Customer;
 
-use App\Models\User;
+use App\Models\Customer;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
-use App\Models\customer;
 
 class AuthService
 {
@@ -17,12 +16,12 @@ class AuthService
      */
     public function register(array $data): array
     {
-        // Create the user
-        $user = customer::create([
+        // Create the customer
+        $user = Customer::create([
             'name' => $data['name'],
             'email' => $data['email'],
-            'mobile' => $data['mobile'] ?? null,
-            'area'   => $data['area'],
+            'phone' => $data['mobile'] ?? null, // Map mobile to phone
+            'area_id' => $data['area'] ?? null, // Map area to area_id
             'password' => bcrypt($data['password']),
         ]);
         $token = $user->createToken('customer-api-token')->plainTextToken;
@@ -45,9 +44,9 @@ class AuthService
      */
     public function login(string $login, string $password): array
     {
-        // Find user by email or mobile
-        $user = User::where('email', $login)
-                    ->orWhere('mobile', $login)
+        // Find customer by email or phone
+        $user = Customer::where('email', $login)
+                    ->orWhere('phone', $login)
                     ->first();
 
         if (! $user || ! Hash::check($password, $user->password)) {

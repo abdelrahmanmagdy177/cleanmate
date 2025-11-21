@@ -1,29 +1,23 @@
 <?php
-
-namespace App\Http\Requests\customer;
+namespace App\Http\Requests\Customer;
 
 use Illuminate\Foundation\Http\FormRequest;
 
 class RegisterRequest extends FormRequest
 {
-    /**
-     * Determine if the user is authorized to make this request.
-     */
     public function authorize(): bool
     {
-        return false;
+        return true; // allow everyone
     }
 
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
-     */
     public function rules(): array
     {
         return [
-            'login' => ['required', 'string'],
-            'password' => ['required', 'string', 'min:6'],
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'email', 'unique:customers,email'],
+            'password' => ['required', 'string', 'min:6', 'confirmed'], // requires password_confirmation
+            'mobile' => ['nullable', 'string', 'max:20'],
+            'area' => ['nullable', 'integer', 'exists:areas,id'],
         ];
     }
 }

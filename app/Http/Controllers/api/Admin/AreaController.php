@@ -3,22 +3,22 @@
 namespace App\Http\Controllers\Api\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\Area;
+use App\Services\Admin\AreaService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
 class AreaController extends Controller
 {
+    protected AreaService $areaService;
+
+    public function __construct(AreaService $areaService)
+    {
+        $this->areaService = $areaService;
+    }
+
     public function index(Request $request)
     {
-        $query = Area::with('zone');
-
-        // Filter by zone if provided
-        if ($request->has('zone_id')) {
-            $query->where('zone_id', $request->zone_id);
-        }
-
-        $areas = $query->orderBy('name')->get();
+        $areas = $this->areaService->getAllAreas($request->zone_id);
         
         return response()->json([
             'data' => $areas
@@ -37,7 +37,7 @@ class AreaController extends Controller
             return response()->json(['errors' => $validator->errors()], 422);
         }
 
-        $area = Area::create($request->all());
+        $area = $this->areaService->createArea($request->all());
 
         return response()->json([
             'message' => 'Area created successfully',
@@ -47,8 +47,12 @@ class AreaController extends Controller
 
     public function show($id)
     {
-        $area = Area::with('zone')->findOrFail($id);
+        $area = $this->areaService->getArea($id);
         
+        if (!$area) {
+            return response()->json(['error' => 'Area not found'], 404);
+        }
+
         return response()->json([
             'data' => $area
         ]);
@@ -56,8 +60,6 @@ class AreaController extends Controller
 
     public function update(Request $request, $id)
     {
-        $area = Area::findOrFail($id);
-
         $validator = Validator::make($request->all(), [
             'zone_id' => 'sometimes|exists:zones,id',
             'name' => 'sometimes|string|max:255',
@@ -68,7 +70,11 @@ class AreaController extends Controller
             return response()->json(['errors' => $validator->errors()], 422);
         }
 
-        $area->update($request->all());
+        $area = $this->areaService->updateArea($id, $request->all());
+
+        if (!$area) {
+            return response()->json(['error' => 'Area not found'], 404);
+        }
 
         return response()->json([
             'message' => 'Area updated successfully',
@@ -78,8 +84,11 @@ class AreaController extends Controller
 
     public function destroy($id)
     {
-        $area = Area::findOrFail($id);
-        $area->delete();
+        $deleted = $this->areaService->deleteArea($id);
+
+        if (!$deleted) {
+            return response()->json(['error' => 'Area not found'], 404);
+        }
 
         return response()->json([
             'message' => 'Area deleted successfully'
@@ -88,8 +97,11 @@ class AreaController extends Controller
 
     public function toggle($id)
     {
-        $area = Area::findOrFail($id);
-        $area->update(['is_active' => !$area->is_active]);
+        $area = $this->areaService->toggleStatus($id);
+
+        if (!$area) {
+            return response()->json(['error' => 'Area not found'], 404);
+        }
 
         return response()->json([
             'message' => 'Area status updated successfully',

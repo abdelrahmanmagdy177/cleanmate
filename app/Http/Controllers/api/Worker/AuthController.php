@@ -3,13 +3,20 @@
 namespace App\Http\Controllers\Api\Worker;
 
 use App\Http\Controllers\Controller;
-use App\Models\Worker;
+use App\Services\Worker\AuthService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
 {
+    protected AuthService $authService;
+
+    public function __construct(AuthService $authService)
+    {
+        $this->authService = $authService;
+    }
+
     public function login(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -21,28 +28,17 @@ class AuthController extends Controller
             return response()->json(['errors' => $validator->errors()], 422);
         }
 
-        $worker = Worker::where('email', $request->email)->first();
-
-        if (!$worker || !Hash::check($request->password, $worker->password)) {
-            return response()->json(['error' => 'Invalid credentials'], 401);
+        try {
+            $result = $this->authService->login($request->email, $request->password);
+            return response()->json($result);
+        } catch (ValidationException $e) {
+            return response()->json(['error' => $e->getMessage()], 401); // Keeping 401 as per original, though validation usually 422. Original returned 401 for invalid creds.
         }
-
-        if ($worker->status !== 'active') {
-            return response()->json(['error' => 'Account is inactive'], 403);
-        }
-
-        $token = $worker->createToken('worker-token')->plainTextToken;
-
-        return response()->json([
-            'message' => 'Login successful',
-            'token' => $token,
-            'worker' => $worker
-        ]);
     }
 
     public function logout(Request $request)
     {
-        $request->user()->currentAccessToken()->delete();
+        $this->authService->logout($request->user());
         return response()->json(['message' => 'Logged out successfully']);
     }
 }

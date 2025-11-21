@@ -3,15 +3,22 @@
 namespace App\Http\Controllers\Api\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\Zone;
+use App\Services\Admin\ZoneService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
 class ZoneController extends Controller
 {
+    protected ZoneService $zoneService;
+
+    public function __construct(ZoneService $zoneService)
+    {
+        $this->zoneService = $zoneService;
+    }
+
     public function index()
     {
-        $zones = Zone::with('areas')->orderBy('name')->get();
+        $zones = $this->zoneService->getAllZones();
         
         return response()->json([
             'data' => $zones
@@ -30,7 +37,7 @@ class ZoneController extends Controller
             return response()->json(['errors' => $validator->errors()], 422);
         }
 
-        $zone = Zone::create($request->all());
+        $zone = $this->zoneService->createZone($request->all());
 
         return response()->json([
             'message' => 'Zone created successfully',
@@ -40,8 +47,12 @@ class ZoneController extends Controller
 
     public function show($id)
     {
-        $zone = Zone::with('areas')->findOrFail($id);
+        $zone = $this->zoneService->getZone($id);
         
+        if (!$zone) {
+            return response()->json(['error' => 'Zone not found'], 404);
+        }
+
         return response()->json([
             'data' => $zone
         ]);
@@ -49,8 +60,6 @@ class ZoneController extends Controller
 
     public function update(Request $request, $id)
     {
-        $zone = Zone::findOrFail($id);
-
         $validator = Validator::make($request->all(), [
             'name' => 'sometimes|string|max:255',
             'is_active' => 'sometimes|boolean',
@@ -61,7 +70,11 @@ class ZoneController extends Controller
             return response()->json(['errors' => $validator->errors()], 422);
         }
 
-        $zone->update($request->all());
+        $zone = $this->zoneService->updateZone($id, $request->all());
+
+        if (!$zone) {
+            return response()->json(['error' => 'Zone not found'], 404);
+        }
 
         return response()->json([
             'message' => 'Zone updated successfully',
@@ -71,8 +84,11 @@ class ZoneController extends Controller
 
     public function destroy($id)
     {
-        $zone = Zone::findOrFail($id);
-        $zone->delete();
+        $deleted = $this->zoneService->deleteZone($id);
+
+        if (!$deleted) {
+            return response()->json(['error' => 'Zone not found'], 404);
+        }
 
         return response()->json([
             'message' => 'Zone deleted successfully'
@@ -81,8 +97,11 @@ class ZoneController extends Controller
 
     public function toggle($id)
     {
-        $zone = Zone::findOrFail($id);
-        $zone->update(['is_active' => !$zone->is_active]);
+        $zone = $this->zoneService->toggleStatus($id);
+
+        if (!$zone) {
+            return response()->json(['error' => 'Zone not found'], 404);
+        }
 
         return response()->json([
             'message' => 'Zone status updated successfully',

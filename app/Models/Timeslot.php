@@ -7,7 +7,12 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Timeslot extends Model
 {
-    protected $fillable = ['day', 'start_time', 'end_time', 'capacity', 'is_active'];
+    protected $fillable = ['day', 'start_time', 'end_time', 'capacity', 'is_active', 'area_id'];
+
+    public function area(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo(Area::class);
+    }
 
     public function orders(): BelongsToMany
     {

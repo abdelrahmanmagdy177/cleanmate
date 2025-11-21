@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use App\Models\Service;
+use App\Models\Area;
 
 class ServiceSeeder extends Seeder
 {
@@ -80,5 +81,14 @@ class ServiceSeeder extends Seeder
             ['min_space' => 101, 'max_space' => 200, 'price' => 250.00],
             ['min_space' => 201, 'max_space' => null, 'price' => 400.00],
         ]);
+
+
+        // Attach all services to all active areas for initial setup
+        $areas = Area::where('is_active', true)->get();
+        $services = Service::all();
+
+        foreach ($services as $service) {
+            $service->areas()->attach($areas);
+        }
     }
 }

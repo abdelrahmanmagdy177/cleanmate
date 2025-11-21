@@ -8,15 +8,56 @@ use Illuminate\Http\Request;
 
 class ServiceController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $services = Service::with('variants.prices')->where('active', true)->get();
+        $areaId = null;
+        if ($request->has('area_id')) {
+            $areaId = $request->area_id;
+        } elseif ($user = $request->user('sanctum')) {
+            $areaId = $user->area_id;
+        }
+
+        // Enforce area_id requirement
+        if (!$areaId) {
+            return response()->json([
+                'error' => 'Area ID is required. Please provide area_id parameter or set your area in your profile.'
+            ], 422);
+        }
+
+        $services = Service::where('active', true)
+            ->where('area_id', $areaId)
+            ->with(['variants.prices' => function ($q) use ($areaId) {
+                $q->where('area_id', $areaId);
+            }])
+            ->get();
+
         return response()->json($services);
     }
 
-    public function show($id)
+    public function show(Request $request, $id)
     {
-        $service = Service::with('variants.prices')->where('active', true)->findOrFail($id);
+        $areaId = $request->query('area_id');
+        
+        // Check authenticated user's area if not provided
+        if (!$areaId && $user = $request->user('sanctum')) {
+            $areaId = $user->area_id;
+        }
+
+        // Enforce area_id requirement
+        if (!$areaId) {
+            return response()->json([
+                'error' => 'Area ID is required. Please provide area_id parameter or set your area in your profile.'
+            ], 422);
+        }
+
+        $service = Service::where('active', true)
+            ->where('id', $id)
+            ->where('area_id', $areaId)
+            ->with(['variants.prices' => function ($q) use ($areaId) {
+                $q->where('area_id', $areaId);
+            }])
+            ->firstOrFail();
+
         return response()->json($service);
     }
 }
