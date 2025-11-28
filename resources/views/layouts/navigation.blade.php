@@ -15,6 +15,12 @@
                     <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                         {{ __('Dashboard') }}
                     </x-nav-link>
+
+                    @foreach($menuItems as $item)
+                        <x-nav-link :href="$item['url']" :active="$item['active']">
+                            {{ $item['label'] }}
+                        </x-nav-link>
+                    @endforeach
                 </div>
             </div>
 
@@ -70,6 +76,12 @@
             <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                 {{ __('Dashboard') }}
             </x-responsive-nav-link>
+
+            @foreach($menuItems as $item)
+                <x-responsive-nav-link :href="$item['url']" :active="$item['active']">
+                    {{ $item['label'] }}
+                </x-responsive-nav-link>
+            @endforeach
         </div>
 
         <!-- Responsive Settings Options -->

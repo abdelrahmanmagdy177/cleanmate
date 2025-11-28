@@ -52,6 +52,11 @@ return [
             'provider' => 'workers',
             'hash' => false,
         ],
+
+        'worker_web' => [
+            'driver' => 'session',
+            'provider' => 'workers',
+        ],
     ],
 
     /*

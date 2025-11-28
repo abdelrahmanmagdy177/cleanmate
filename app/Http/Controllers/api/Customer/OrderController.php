@@ -65,8 +65,13 @@ class OrderController extends Controller
         } catch (ValidationException $e) {
             return response()->json(['errors' => $e->errors()], 422); // Or 422 based on preference, usually 422 for validation
         } catch (\Exception $e) {
-            return response()->json(['error' => 'An error occurred while processing your order.'], 500);
-        }
+    return response()->json([
+        'error' => $e->getMessage(),
+        'line' => $e->getLine(),
+        'file' => $e->getFile()
+    ], 500);
+}
+
     }
 
     /**
@@ -79,7 +84,7 @@ class OrderController extends Controller
     public function index(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'classification' => 'nullable|string|' . OrderStatusClassification::getValidationRule(),
+            'classification' => 'required|string|' . OrderStatusClassification::getValidationRule(),
         ]);
 
         if ($validator->fails()) {
