@@ -1,23 +1,43 @@
-<div class="flex flex-col w-64 h-screen px-4 py-8 bg-white border-r dark:bg-gray-900 dark:border-gray-700">
-    <h2 class="text-3xl font-semibold text-gray-800 dark:text-white text-center">CleanMate</h2>
+<div class="col-md-2 d-md-block sidebar collapse">
+    <div class="position-sticky pt-4 px-3">
+        <!-- Brand -->
+        <div class="text-center mb-4">
+            <h3 class="text-white fw-bold">
+                <i class="bi bi-droplet-fill"></i> CleanMate
+            </h3>
+            <p class="text-white-50 small">Admin Dashboard</p>
+        </div>
 
-    <div class="flex flex-col justify-between flex-1 mt-6">
-        <nav>
+        <!-- Navigation -->
+        <nav class="nav flex-column">
+            <a href="{{ route('dashboard') }}" class="nav-link {{ request()->routeIs('dashboard') ? 'active' : '' }}">
+                <i class="bi bi-speedometer2 me-2"></i> Dashboard
+            </a>
+            
             @foreach($menuItems as $item)
-                <a class="flex items-center px-4 py-2 mt-5 text-gray-600 transition-colors duration-300 transform rounded-md dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 dark:hover:text-gray-200 {{ $item['active'] ? 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-200' : '' }}" href="{{ $item['url'] }}">
-                    <span class="mx-4 font-medium">{{ $item['label'] }}</span>
+                <a href="{{ $item['url'] }}" class="nav-link {{ $item['active'] ? 'active' : '' }}">
+                    <i class="bi bi-{{ $item['icon'] ?? 'circle' }} me-2"></i> {{ $item['label'] }}
                 </a>
             @endforeach
         </nav>
 
-        <div class="flex items-center px-4 -mx-2">
-            <div class="mx-2">
-                <h4 class="font-medium text-gray-800 dark:text-gray-200 hover:underline cursor-pointer">{{ Auth::user()->name }}</h4>
-                <form method="POST" action="{{ route('logout') }}">
-                    @csrf
-                    <button type="submit" class="text-sm font-medium text-gray-500 dark:text-gray-400 hover:underline">Logout</button>
-                </form>
+        <!-- User Section -->
+        <div class="mt-auto pt-4 border-top border-white border-opacity-25">
+            <div class="d-flex align-items-center text-white mb-2">
+                <div class="rounded-circle bg-white bg-opacity-25 p-2 me-2">
+                    <i class="bi bi-person-fill"></i>
+                </div>
+                <div>
+                    <div class="fw-semibold small">{{ Auth::user()->name }}</div>
+                    <div class="text-white-50" style="font-size: 0.7rem;">{{ Auth::user()->email }}</div>
+                </div>
             </div>
+            <form method="POST" action="{{ route('logout') }}">
+                @csrf
+                <button type="submit" class="btn btn-sm btn-outline-light w-100">
+                    <i class="bi bi-box-arrow-right me-1"></i> Logout
+                </button>
+            </form>
         </div>
     </div>
 </div>

@@ -1,45 +1,95 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
-            {{ __('Zones') }}
-        </h2>
+        <h2 class="h3 mb-0 fw-bold text-dark">Zones Management</h2>
+        <p class="text-muted mb-0">Manage service zones and regions</p>
     </x-slot>
 
-    <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6 text-gray-900 dark:text-gray-100">
-                    <table id="zones-table" class="display w-full">
-                        <thead>
+    <div class="card">
+        <div class="card-header bg-white py-3">
+            <div class="d-flex justify-content-between align-items-center">
+                <h5 class="mb-0 fw-bold">
+                    <i class="bi bi-map-fill text-primary me-2"></i>All Zones
+                </h5>
+                <button class="btn btn-primary">
+                    <i class="bi bi-plus-circle me-1"></i> Add New Zone
+                </button>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table id="zones-table" class="table table-hover align-middle">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Zone Name</th>
+                            <th>Description</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach($zones as $zone)
                             <tr>
-                                <th>ID</th>
-                                <th>Name</th>
-                                <th>Status</th>
-                                <th>Actions</th>
+                                <td>
+                                    <span class="badge bg-secondary">#{{ $zone->id }}</span>
+                                </td>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="rounded-circle bg-primary bg-opacity-10 text-primary fw-bold me-2" 
+                                            style="width: 35px; height: 35px; display: flex; align-items: center; justify-content: center;">
+                                            <i class="bi bi-map-fill"></i>
+                                        </div>
+                                        <div>
+                                            <div class="fw-semibold">{{ $zone->name }}</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="text-muted">{{ $zone->description ?? 'No description' }}</span>
+                                </td>
+                                <td>
+                                    @if($zone->is_active)
+                                        <span class="badge bg-success">
+                                            <i class="bi bi-check-circle-fill me-1"></i>Active
+                                        </span>
+                                    @else
+                                        <span class="badge bg-danger">
+                                            <i class="bi bi-x-circle-fill me-1"></i>Inactive
+                                        </span>
+                                    @endif
+                                </td>
+                                <td>
+                                    <div class="btn-group btn-group-sm" role="group">
+                                        <button type="button" class="btn btn-outline-primary" title="Edit">
+                                            <i class="bi bi-pencil-fill"></i>
+                                        </button>
+                                        <button type="button" class="btn btn-outline-info" title="View Areas">
+                                            <i class="bi bi-eye-fill"></i>
+                                        </button>
+                                        <button type="button" class="btn btn-outline-danger" title="Delete">
+                                            <i class="bi bi-trash-fill"></i>
+                                        </button>
+                                    </div>
+                                </td>
                             </tr>
-                        </thead>
-                        <tbody>
-                            @foreach($zones as $zone)
-                                <tr>
-                                    <td>{{ $zone->id }}</td>
-                                    <td>{{ $zone->name }}</td>
-                                    <td>{{ $zone->is_active ? 'Active' : 'Inactive' }}</td>
-                                    <td>
-                                        <button class="text-blue-500 hover:underline">Edit</button>
-                                        <button class="text-red-500 hover:underline ml-2">Delete</button>
-                                    </td>
-                                </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
-                </div>
+                        @endforeach
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
 
     <script>
         $(document).ready(function() {
-            $('#zones-table').DataTable();
+            $('#zones-table').DataTable({
+                pageLength: 10,
+                order: [[0, 'asc']],
+                language: {
+                    search: "Search zones:",
+                    lengthMenu: "Show _MENU_ entries",
+                    info: "Showing _START_ to _END_ of _TOTAL_ zones"
+                }
+            });
         });
     </script>
 </x-app-layout>
