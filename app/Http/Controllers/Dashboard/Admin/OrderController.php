@@ -45,6 +45,6 @@ class OrderController extends Controller
             
         $zones = Zone::active()->get();
 
-        return view('dashboard', compact('orders', 'zones', 'startDate', 'endDate', 'ordersByZone', 'zoneId'));
+        return view('dashboard.admin.orders.index', compact('orders', 'zones', 'startDate', 'endDate', 'ordersByZone', 'zoneId'));
     }
 }

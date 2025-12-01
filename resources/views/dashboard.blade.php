@@ -1,263 +1,170 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="h3 mb-0 fw-bold text-dark">Dashboard Overview</h2>
-        <p class="text-muted mb-0">Monitor your business performance and zone analytics</p>
+        <h2 class="h3 mb-0 fw-bold text-dark">Dashboard</h2>
+        <p class="text-muted mb-0">Welcome to CleanMate Admin Dashboard</p>
     </x-slot>
 
-    <!-- Filters Section -->
-    <div class="card mb-4">
-        <div class="card-body">
-            <form method="GET" action="{{ route('dashboard') }}" class="row g-3">
-                <div class="col-md-3">
-                    <label for="start_date" class="form-label fw-semibold">Start Date</label>
-                    <input type="date" class="form-control" id="start_date" name="start_date" value="{{ $startDate }}">
-                </div>
-                <div class="col-md-3">
-                    <label for="end_date" class="form-label fw-semibold">End Date</label>
-                    <input type="date" class="form-control" id="end_date" name="end_date" value="{{ $endDate }}">
-                </div>
-                <div class="col-md-4">
-                    <label for="zone_id" class="form-label fw-semibold">Zone Filter</label>
-                    <select class="form-select" id="zone_id" name="zone_id">
-                        <option value="">All Zones</option>
-                        @foreach($zones as $zone)
-                            <option value="{{ $zone->id }}" {{ $zoneId == $zone->id ? 'selected' : '' }}>
-                                {{ $zone->name }}
-                            </option>
-                        @endforeach
-                    </select>
-                </div>
-                <div class="col-md-2 d-flex align-items-end">
-                    <button type="submit" class="btn btn-primary w-100 me-2">
-                        <i class="bi bi-funnel-fill"></i> Filter
-                    </button>
-                    <a href="{{ route('dashboard') }}" class="btn btn-outline-secondary">
-                        <i class="bi bi-arrow-clockwise"></i>
-                    </a>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Statistics Cards -->
+    <!-- Quick Stats -->
     <div class="row mb-4">
-        <!-- Total Orders -->
-        <div class="col-md-4 mb-3">
-            <div class="card stat-card">
+        <div class="col-md-3 mb-3">
+            <div class="card stat-card h-100">
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-start">
                         <div>
                             <h6 class="text-white-50 text-uppercase mb-2">Total Orders</h6>
-                            <h2 class="display-4 mb-0">{{ number_format($orders->count()) }}</h2>
+                            <h2 class="display-5 mb-0">{{ \App\Models\Order::count() }}</h2>
                         </div>
                         <div class="bg-white bg-opacity-25 rounded-3 p-3">
-                            <i class="bi bi-bag-check-fill fs-2"></i>
-                        </div>
-                    </div>
-                    <div class="mt-3">
-                        <span class="badge bg-success bg-opacity-75">
-                            <i class="bi bi-arrow-up"></i> +12.5%
-                        </span>
-                        <span class="ms-2 small">vs last period</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Total Revenue -->
-        <div class="col-md-4 mb-3">
-            <div class="card stat-card" style="background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-start">
-                        <div>
-                            <h6 class="text-white-50 text-uppercase mb-2">Total Revenue</h6>
-                            <h2 class="display-4 mb-0">{{ number_format($orders->sum('total_price'), 0) }}</h2>
-                            <p class="mb-0 small">EGP</p>
-                        </div>
-                        <div class="bg-white bg-opacity-25 rounded-3 p-3">
-                            <i class="bi bi-currency-dollar fs-2"></i>
+                            <i class="bi bi-bag-check-fill fs-3"></i>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Active Zones -->
-        <div class="col-md-4 mb-3">
-            <div class="card stat-card" style="background: linear-gradient(135deg, #ee0979 0%, #ff6a00 100%);">
+        <div class="col-md-3 mb-3">
+            <div class="card stat-card h-100" style="background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);">
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-start">
                         <div>
-                            <h6 class="text-white-50 text-uppercase mb-2">Operating Zones</h6>
-                            <h2 class="display-4 mb-0">{{ $ordersByZone->count() }}</h2>
+                            <h6 class="text-white-50 text-uppercase mb-2">Total Zones</h6>
+                            <h2 class="display-5 mb-0">{{ \App\Models\Zone::count() }}</h2>
                         </div>
                         <div class="bg-white bg-opacity-25 rounded-3 p-3">
-                            <i class="bi bi-geo-alt-fill fs-2"></i>
+                            <i class="bi bi-geo-alt-fill fs-3"></i>
                         </div>
                     </div>
-                    <div class="mt-3">
-                        <span class="badge bg-light text-dark">Active</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3 mb-3">
+            <div class="card stat-card h-100" style="background: linear-gradient(135deg, #ee0979 0%, #ff6a00 100%);">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <h6 class="text-white-50 text-uppercase mb-2">Total Areas</h6>
+                            <h2 class="display-5 mb-0">{{ \App\Models\Area::count() }}</h2>
+                        </div>
+                        <div class="bg-white bg-opacity-25 rounded-3 p-3">
+                            <i class="bi bi-map-fill fs-3"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3 mb-3">
+            <div class="card stat-card h-100" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <h6 class="text-white-50 text-uppercase mb-2">Total Workers</h6>
+                            <h2 class="display-5 mb-0">{{ \App\Models\Worker::count() }}</h2>
+                        </div>
+                        <div class="bg-white bg-opacity-25 rounded-3 p-3">
+                            <i class="bi bi-people-fill fs-3"></i>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Zone Performance Section -->
-    <div class="card mb-4">
-        <div class="card-header bg-white py-3">
-            <div class="d-flex justify-content-between align-items-center">
-                <h5 class="mb-0 fw-bold">
-                    <i class="bi bi-bar-chart-fill text-primary me-2"></i>Zone Performance
-                </h5>
-                <span class="badge bg-primary">{{ $ordersByZone->count() }} Zones</span>
+    <!-- Quick Links -->
+    <div class="row">
+        <div class="col-md-6 mb-4">
+            <div class="card h-100">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0 fw-bold">
+                        <i class="bi bi-speedometer2 text-primary me-2"></i>Quick Actions
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a href="{{ url('dashboard/admin/orders') }}" class="btn btn-outline-primary btn-lg text-start">
+                            <i class="bi bi-bar-chart-fill me-2"></i>View Orders Analytics
+                        </a>
+                        <a href="{{ url('dashboard/admin/zones') }}" class="btn btn-outline-success btn-lg text-start">
+                            <i class="bi bi-map-fill me-2"></i>Manage Zones
+                        </a>
+                        <a href="{{ url('dashboard/admin/areas') }}" class="btn btn-outline-info btn-lg text-start">
+                            <i class="bi bi-geo-alt-fill me-2"></i>Manage Areas
+                        </a>
+                        <a href="{{ url('dashboard/admin/workers') }}" class="btn btn-outline-warning btn-lg text-start">
+                            <i class="bi bi-people-fill me-2"></i>Manage Workers
+                        </a>
+                    </div>
+                </div>
             </div>
         </div>
-        <div class="card-body">
-            @if($ordersByZone->isEmpty())
-                <div class="text-center py-5">
-                    <i class="bi bi-inbox display-1 text-muted"></i>
-                    <h4 class="mt-3 text-muted">No Data Available</h4>
-                    <p class="text-muted">Try adjusting your filters to see zone performance.</p>
+
+        <div class="col-md-6 mb-4">
+            <div class="card h-100">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0 fw-bold">
+                        <i class="bi bi-clock-history text-primary me-2"></i>Recent Activity
+                    </h5>
                 </div>
-            @else
-                <div class="row">
-                    @php $maxOrders = $ordersByZone->max('total_orders') ?: 1; @endphp
-                    @foreach($ordersByZone as $index => $stat)
-                        <div class="col-md-6 col-lg-4 col-xl-3 mb-3">
-                            <div class="card zone-card h-100">
-                                <div class="card-body">
-                                    <div class="d-flex justify-content-between align-items-start mb-3">
-                                        <div>
-                                            <h6 class="fw-bold mb-1">{{ $stat->zone_name }}</h6>
-                                            <small class="text-muted">Zone #{{ $stat->zone_id }}</small>
-                                        </div>
-                                        <span class="badge bg-primary rounded-circle" style="width: 30px; height: 30px; display: flex; align-items: center; justify-content: center;">
-                                            {{ $index + 1 }}
-                                        </span>
+                <div class="card-body">
+                    <div class="list-group list-group-flush">
+                        @php
+                            $recentOrders = \App\Models\Order::with('customer')->latest()->take(5)->get();
+                        @endphp
+                        @forelse($recentOrders as $order)
+                            <div class="list-group-item px-0">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="mb-1">Order #{{ $order->id }}</h6>
+                                        <small class="text-muted">{{ $order->customer->name ?? 'Unknown' }}</small>
                                     </div>
-
-                                    <div class="mb-3">
-                                        <div class="d-flex justify-content-between mb-1">
-                                            <small class="text-muted">Orders</small>
-                                            <strong>{{ $stat->total_orders }}</strong>
-                                        </div>
-                                        <div class="progress" style="height: 8px;">
-                                            <div class="progress-bar bg-primary" role="progressbar" 
-                                                style="width: {{ ($stat->total_orders / $maxOrders) * 100 }}%"
-                                                aria-valuenow="{{ $stat->total_orders }}" 
-                                                aria-valuemin="0" 
-                                                aria-valuemax="{{ $maxOrders }}">
-                                            </div>
-                                        </div>
+                                    <div class="text-end">
+                                        <div class="fw-bold">{{ number_format($order->total_price, 2) }} EGP</div>
+                                        <small class="text-muted">{{ $order->created_at->diffForHumans() }}</small>
                                     </div>
-
-                                    <div class="border-top pt-3">
-                                        <div class="d-flex justify-content-between align-items-center">
-                                            <small class="text-muted">Revenue</small>
-                                            <strong class="text-success">{{ number_format($stat->total_revenue, 0) }} EGP</strong>
-                                        </div>
-                                    </div>
-
-                                    <a href="{{ route('dashboard', ['zone_id' => $stat->zone_id, 'start_date' => $startDate, 'end_date' => $endDate]) }}" 
-                                        class="btn btn-sm btn-outline-primary w-100 mt-3">
-                                        <i class="bi bi-eye"></i> View Details
-                                    </a>
                                 </div>
                             </div>
-                        </div>
-                    @endforeach
+                        @empty
+                            <div class="text-center py-4 text-muted">
+                                <i class="bi bi-inbox display-6"></i>
+                                <p class="mb-0 mt-2">No recent orders</p>
+                            </div>
+                        @endforelse
+                    </div>
                 </div>
-            @endif
-        </div>
-    </div>
-
-    <!-- Recent Orders Table -->
-    <div class="card">
-        <div class="card-header bg-white py-3">
-            <h5 class="mb-0 fw-bold">
-                <i class="bi bi-list-ul text-primary me-2"></i>Recent Orders
-            </h5>
-        </div>
-        <div class="card-body">
-            <div class="table-responsive">
-                <table id="orders-table" class="table table-hover align-middle">
-                    <thead>
-                        <tr>
-                            <th>Order ID</th>
-                            <th>Date</th>
-                            <th>Customer</th>
-                            <th>Location</th>
-                            <th>Service</th>
-                            <th>Amount</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach($orders as $order)
-                            <tr>
-                                <td>
-                                    <span class="badge bg-primary">#{{ $order->id }}</span>
-                                </td>
-                                <td>
-                                    <div>{{ \Carbon\Carbon::parse($order->order_date)->format('M d, Y') }}</div>
-                                    <small class="text-muted">{{ \Carbon\Carbon::parse($order->created_at)->format('h:i A') }}</small>
-                                </td>
-                                <td>
-                                    <div class="d-flex align-items-center">
-                                        <div class="rounded-circle bg-primary bg-opacity-10 text-primary fw-bold me-2" 
-                                            style="width: 35px; height: 35px; display: flex; align-items: center; justify-content: center;">
-                                            {{ substr($order->customer->name ?? 'U', 0, 1) }}
-                                        </div>
-                                        <div>
-                                            <div class="fw-semibold">{{ $order->customer->name ?? 'Unknown' }}</div>
-                                            <small class="text-muted">{{ $order->customer->phone ?? 'N/A' }}</small>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td>
-                                    <div class="fw-semibold">{{ $order->customerAddress->area->zone->name ?? 'N/A' }}</div>
-                                    <small class="text-muted">{{ $order->customerAddress->area->name ?? 'N/A' }}</small>
-                                </td>
-                                <td>
-                                    <span class="badge bg-info">{{ $order->service->name ?? 'Service' }}</span>
-                                </td>
-                                <td>
-                                    <strong>{{ number_format($order->total_price, 2) }} EGP</strong>
-                                </td>
-                                <td>
-                                    @php
-                                        $statusConfig = [
-                                            'completed' => ['class' => 'success', 'icon' => 'check-circle-fill'],
-                                            'pending' => ['class' => 'warning', 'icon' => 'clock-fill'],
-                                            'cancelled' => ['class' => 'danger', 'icon' => 'x-circle-fill'],
-                                            'processing' => ['class' => 'info', 'icon' => 'arrow-repeat'],
-                                        ];
-                                        $config = $statusConfig[$order->status] ?? ['class' => 'secondary', 'icon' => 'circle-fill'];
-                                    @endphp
-                                    <span class="badge bg-{{ $config['class'] }}">
-                                        <i class="bi bi-{{ $config['icon'] }} me-1"></i>{{ ucfirst($order->status) }}
-                                    </span>
-                                </td>
-                            </tr>
-                        @endforeach
-                    </tbody>
-                </table>
             </div>
         </div>
     </div>
 
-    <script>
-        $(document).ready(function() {
-            $('#orders-table').DataTable({
-                pageLength: 10,
-                order: [[1, 'desc']],
-                language: {
-                    search: "Search orders:",
-                    lengthMenu: "Show _MENU_ entries",
-                    info: "Showing _START_ to _END_ of _TOTAL_ orders"
-                }
-            });
-        });
-    </script>
+    <!-- System Info -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-md-3">
+                            <i class="bi bi-calendar-check text-primary fs-3"></i>
+                            <h6 class="mt-2 mb-0">Today's Date</h6>
+                            <p class="text-muted">{{ now()->format('M d, Y') }}</p>
+                        </div>
+                        <div class="col-md-3">
+                            <i class="bi bi-clock text-success fs-3"></i>
+                            <h6 class="mt-2 mb-0">Current Time</h6>
+                            <p class="text-muted">{{ now()->format('h:i A') }}</p>
+                        </div>
+                        <div class="col-md-3">
+                            <i class="bi bi-person-circle text-info fs-3"></i>
+                            <h6 class="mt-2 mb-0">Logged in as</h6>
+                            <p class="text-muted">{{ Auth::user()->name }}</p>
+                        </div>
+                        <div class="col-md-3">
+                            <i class="bi bi-shield-check text-warning fs-3"></i>
+                            <h6 class="mt-2 mb-0">System Status</h6>
+                            <p class="text-muted"><span class="badge bg-success">Online</span></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </x-app-layout>
